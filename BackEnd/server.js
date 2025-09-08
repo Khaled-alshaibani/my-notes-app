@@ -7,6 +7,7 @@ import bcrypt from "bcryptjs";
 // * MODELS AND FUNCTIONS
 import { connectDB } from "./config/db.js";
 import User from "./models/user.model.js";
+import Note from "./models/note.model.js";
 import generateToken from "./utils/generateToken.js";
 
 // * =============== INITIALIZATIONS ================
@@ -183,6 +184,44 @@ app.delete("/deleteUser/:id", async (req, res) => {
 });
 
 // ? |||||||||||||||||||||||||||||||||||||||||||| NOTES |||||||||||||||||||||||||||||||||||||||||||
+
+app.get("/notes", (req, res) => {
+  res.send("Welcome to my notes!");
+});
+
+app.post("/addNote", async (req, res) => {
+  try {
+    const { userName, title, content } = req.body;
+    if (!userName || !title || !content) {
+      return res
+        .status(400)
+        .json({ success: false, msg: "missing credentials!" });
+    }
+
+    const creator = await User.findOne({ userName });
+    if (!creator) {
+      return res.status(404).json({ success: false, msg: "User not found!" });
+    }
+
+    const newNote = await Note.create({
+      title,
+      content,
+      creator: creator._id,
+    });
+
+    creator.notes.push(newNote); // إضافة النوت مع الـ id
+    await creator.save();
+
+    res.status(201).json({
+      success: true,
+      msg: `Note "${newNote.title}" was added successfully!`,
+      newNote,
+      notes: creator.notes, // إرجاع المصفوفة كاملة
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, msg: err.message });
+  }
+});
 
 // * ========================================
 app.listen(PORT, () => {
