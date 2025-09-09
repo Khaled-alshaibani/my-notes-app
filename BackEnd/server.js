@@ -4,11 +4,14 @@ import dotenv from "dotenv";
 import crypto from "crypto";
 import bcrypt from "bcryptjs";
 
-// * MODELS AND FUNCTIONS
-import { connectDB } from "./config/db.js";
+// * MODELS
 import User from "./models/user.model.js";
 import Note from "./models/note.model.js";
+
+// * EXTERNAL FUNCTIONS
+import { connectDB } from "./config/db.js";
 import generateToken from "./utils/generateToken.js";
+import { protect } from "./middleware/auth.js";
 
 // * =============== INITIALIZATIONS ================
 dotenv.config();
@@ -47,10 +50,10 @@ app.post("/SignUp", async (req, res) => {
     const newUser = await User.create({
       userName,
       email,
-      password: hashedPassword, // <-- مهم: الحقل اسمه password
+      password: hashedPassword,
     });
 
-    const token = generateToken(newUser._id); // استعمل id بعد الإنشاء
+    const token = generateToken(newUser._id);
     newUser.token = token;
     await newUser.save();
 
@@ -72,7 +75,6 @@ app.post("/SignUp", async (req, res) => {
 app.get("/getUsers", async (req, res) => {
   try {
     const users = await User.find();
-    console.log(users.userName);
     res.status(200).json(users);
   } catch (e) {
     console.log(`error: ${e}`);
@@ -185,43 +187,131 @@ app.delete("/deleteUser/:id", async (req, res) => {
 
 // ? |||||||||||||||||||||||||||||||||||||||||||| NOTES |||||||||||||||||||||||||||||||||||||||||||
 
-app.get("/notes", (req, res) => {
-  res.send("Welcome to my notes!");
-});
-
-app.post("/addNote", async (req, res) => {
+// * ===================== Creating New Note =====================
+app.post("/addNote", protect, async (req, res) => {
   try {
-    const { userName, title, content } = req.body;
-    if (!userName || !title || !content) {
+    const { title, content } = req.body;
+    if (!title || !content) {
       return res
         .status(400)
-        .json({ success: false, msg: "missing credentials!" });
-    }
-
-    const creator = await User.findOne({ userName });
-    if (!creator) {
-      return res.status(404).json({ success: false, msg: "User not found!" });
+        .json({ success: false, msg: "Missing credentials!" });
     }
 
     const newNote = await Note.create({
       title,
       content,
-      creator: creator._id,
+      creator: req.user._id,
     });
 
-    creator.notes.push(newNote); // إضافة النوت مع الـ id
-    await creator.save();
+    req.user.notes.push(newNote);
+    await req.user.save();
 
     res.status(201).json({
       success: true,
       msg: `Note "${newNote.title}" was added successfully!`,
       newNote,
-      notes: creator.notes, // إرجاع المصفوفة كاملة
+      notes: req.user.notes,
     });
-  } catch (err) {
+  } catch (e) {
+    res.status(500).json({ success: false, msg: e.message });
+  }
+});
+
+// * ===================== Getting Notes =========================
+app.get("/getNotes", async (req, res) => {
+  try {
+    const notes = await Note.find();
+    if (!notes) {
+      res.status(400).json({ success: false, msg: "There is no note yet!" });
+    }
+
+    res.status(200).json({ success: true, notes });
+  } catch (e) {
     res.status(500).json({ success: false, msg: err.message });
   }
 });
+
+// * ============================== Updating Note ==============================
+app.put("/updateNote/:id", protect, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { title, content } = req.body;
+
+    const note = await Note.findById(id);
+    if (!note) {
+      return res.status(404).json({ success: false, msg: "Note not found" });
+    }
+
+    if (note.creator.toString() !== req.user._id.toString()) {
+      return res
+        .status(403)
+        .json({ success: false, msg: "Not authorized to update this note" });
+    }
+
+    if (title) note.title = title;
+    if (content) note.content = content;
+
+    const updatedNote = await note.save();
+
+    res.status(200).json({
+      success: true,
+      msg: "Note was Updated Successfully",
+      updatedNote,
+    });
+  } catch (e) {
+    console.log(e);
+    res.status(500).json({ success: false, msg: "Server Error!" });
+  }
+});
+
+// * ============================== Deleting Note ==============================
+app.delete("/deleteNote/:id", protect, async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const note = await Note.findById(id);
+    if (!note) {
+      return res.status(404).json({ success: false, msg: "Note not found" });
+    }
+
+    if (note.creator.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ success: false, msg: "Not authorized" });
+    }
+
+    await note.deleteOne();
+
+    req.user.notes = req.user.notes.filter(
+      (noteId) => noteId.toString() !== id
+    );
+    await req.user.save();
+
+    res.status(200).json({
+      success: true,
+      msg: "Note was deleted successfully",
+      notes: req.user.notes,
+    });
+  } catch (e) {
+    console.log(e);
+    res.status(500).json({ success: false, msg: "Server Error!" });
+  }
+});
+
+app.put("/clearUserNotes", protect, async (req, res) => {
+  try {
+    req.user.notes = [];
+    await req.user.save();
+
+    res.status(200).json({
+      success: true,
+      msg: "All notes references removed from your account",
+      notes: req.user.notes,
+    });
+  } catch (e) {
+    console.log(e);
+    res.status(500).json({ success: false, msg: "Server Error!" });
+  }
+});
+
 
 // * ========================================
 app.listen(PORT, () => {

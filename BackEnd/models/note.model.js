@@ -10,11 +10,15 @@ export const noteSchema = mongoose.Schema(
       type: String,
       required: false,
     },
+    creator: {
+      type: String,
+      required: true,
+    },
   },
   {
     timestamps: true,
   }
 );
 
-const Note = mongoose.model("Note", noteSchema)
+const Note = mongoose.model("Note", noteSchema);
 export default Note;
