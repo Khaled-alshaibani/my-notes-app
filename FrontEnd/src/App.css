@@ -1,4 +1,17 @@
-#root {
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
+.mainApp {
+  width: 100vw;
+  height: 100vh;
+  background: linear-gradient(45deg, #020c3d 30%, #1a1919 90%);
+}
+
+
+/* #root {
   max-width: 1280px;
   margin: 0 auto;
   padding: 2rem;
@@ -39,4 +52,4 @@
 
 .read-the-docs {
   color: #888;
-}
+} */
