@@ -3,6 +3,7 @@ import express from "express";
 import dotenv from "dotenv";
 import crypto from "crypto";
 import bcrypt from "bcryptjs";
+import cors from "cors";
 
 // * MODELS
 import User from "./models/user.model.js";
@@ -19,6 +20,7 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 app.use(express.json());
+app.use(cors());
 
 // ? |||||||||||||||||||||||||||||||||||||||| Users |||||||||||||||||||||||||||||||||||||
 
@@ -176,9 +178,13 @@ app.delete("/deleteUser/:id", async (req, res) => {
       return res.status(404).json({ success: false, msg: "User not found" });
     }
 
-    res
-      .status(200)
-      .json({ success: true, msg: "User deleted successfully", deletedUser });
+    await Note.deleteMany({ userId: id });
+
+    res.status(200).json({
+      success: true,
+      msg: "User and notes deleted successfully",
+      deletedUser,
+    });
   } catch (e) {
     console.log(e);
     res.status(500).json({ success: false, msg: "Server Error" });
@@ -228,6 +234,27 @@ app.get("/getNotes", async (req, res) => {
     res.status(200).json({ success: true, notes });
   } catch (e) {
     res.status(500).json({ success: false, msg: err.message });
+  }
+});
+
+// * ============================== Getting User Notes =========================
+
+app.get("/users/:id/notes", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const user = await User.findById(id);
+
+    if (!user)
+      return res.status(404).json({ success: false, msg: "user not found" });
+
+    res.status(200).json({
+      success: true,
+      msg: "user notes retrieved successfully",
+      notes: user.notes,
+    });
+  } catch (e) {
+    console.log(e);
+    res.status(500).json({ success: false, msg: "Server Error!" });
   }
 });
 
@@ -311,7 +338,6 @@ app.put("/clearUserNotes", protect, async (req, res) => {
     res.status(500).json({ success: false, msg: "Server Error!" });
   }
 });
-
 
 // * ========================================
 app.listen(PORT, () => {
