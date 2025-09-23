@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import GetNotes from "../middleware/getNotes";
 import { useNotes } from "../contexts/notesContext";
 import { useDispatch } from "../contexts/notesContext";
@@ -8,10 +8,22 @@ import {
   Grid,
   Card,
   CardContent,
+  Box,
+  Button,
 } from "@mui/material";
+import AddIcon from "@mui/icons-material/Add";
+import ViewNote from "./veiwNote";
+import AddNoteDialog from "./addNote";
 
 const UserNotes = () => {
+  const [selectedNote, setSelectedNote] = useState();
+  const [open, setOpen] = useState(false);
+
   const notesDispatch = useDispatch();
+
+  const handleAddNote = () => {
+    // Todo: do this later.
+  };
 
   useEffect(() => {
     const fetchNotes = async () => {
@@ -22,7 +34,6 @@ const UserNotes = () => {
   }, []);
 
   let notes = useNotes();
-
   const user = JSON.parse(localStorage.getItem("currentUser"));
 
   notes = Array.isArray(notes)
@@ -36,17 +47,49 @@ const UserNotes = () => {
 
   return (
     <Container maxWidth="lg" sx={{ mt: 5, mb: 5 }}>
-      <Typography
-        variant="h4"
+      <Box
         sx={{
-          textAlign: "center",
-          fontWeight: "bold",
-          color: "white",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
           mb: 4,
+          flexDirection: { xs: "column", sm: "row" },
+          gap: { xs: 2, sm: 0 },
         }}
       >
-        {username}'s Notes
-      </Typography>
+        <Typography
+          variant="h5"
+          sx={{
+            fontWeight: "bold",
+            color: "white",
+            order: { xs: 2, sm: 1 },
+          }}
+        >
+          {username}'s Notes
+        </Typography>
+
+        <Button
+          variant="contained"
+          startIcon={<AddIcon />}
+          sx={{
+            bgcolor: "#1976d2",
+            borderRadius: 3,
+            px: 3,
+            fontSize: { xs: "0.8rem", sm: "0.875rem" },
+            minWidth: { xs: "120px", sm: "auto" },
+            "&:hover": { bgcolor: "#1565c0" },
+            order: { xs: 1, sm: 2 },
+          }}
+          onClick={() => setOpen(true)}
+        >
+          Add Note
+        </Button>
+        <AddNoteDialog
+          open={open}
+          onClose={() => setOpen(false)}
+          onSave={handleAddNote}
+        />
+      </Box>
 
       {notes.length === 0 ? (
         <Typography
@@ -60,14 +103,25 @@ const UserNotes = () => {
           No notes available yet.
         </Typography>
       ) : (
-        <Grid container spacing={3}>
+        <Grid
+          container
+          spacing={3}
+          justifyContent="center"
+          sx={{ width: "100%", margin: 0 }}
+        >
           {notes.map((note, index) => (
             <Grid
+              onClick={() => setSelectedNote(note)}
               item
               key={index}
-              xs={12}  // هاتف: عنصر واحد
-              sm={6}   // tablet: عنصرين
-              md={4}   // desktop: ثلاثة
+              size={4}
+              xs={12}
+              sm={6}
+              md={4}
+              sx={{
+                display: "flex",
+                justifyContent: "center",
+              }}
             >
               <Card
                 sx={{
@@ -77,15 +131,23 @@ const UserNotes = () => {
                   boxShadow: "0 4px 10px rgba(0,0,0,0.3)",
                   transition: "transform 0.3s ease, box-shadow 0.3s ease",
                   "&:hover": {
-                    transform: "translateY(-6px)",
-                    boxShadow: "0 8px 20px rgba(0,0,0,0.5)",
+                    transform: "translateY(-4px)",
+                    boxShadow: "0 6px 15px rgba(0,0,0,0.4)",
                   },
                   height: "100%",
                   display: "flex",
                   flexDirection: "column",
+                  width: "100%",
+                  maxWidth: { xs: "100%", sm: "350px", md: "100%" },
                 }}
               >
-                <CardContent sx={{ flexGrow: 1 }}>
+                <CardContent
+                  sx={{
+                    flexGrow: 1,
+                    p: { xs: 2, sm: 2.5 },
+                    "&:last-child": { pb: { xs: 2, sm: 2.5 } },
+                  }}
+                >
                   <Typography
                     variant="h6"
                     sx={{
@@ -93,6 +155,8 @@ const UserNotes = () => {
                       borderBottom: "1px solid rgba(255,255,255,0.2)",
                       pb: 1,
                       mb: 2,
+                      fontSize: { xs: "1.1rem", sm: "1.2rem" },
+                      wordBreak: "break-word",
                     }}
                   >
                     {note.title}
@@ -100,8 +164,14 @@ const UserNotes = () => {
                   <Typography
                     sx={{
                       color: "rgba(255,255,255,0.9)",
-                      fontSize: "0.95rem",
+                      fontSize: { xs: "0.9rem", sm: "0.95rem" },
                       mb: 2,
+                      lineHeight: 1.5,
+                      wordBreak: "break-word",
+                      overflow: "hidden",
+                      display: "-webkit-box",
+                      WebkitLineClamp: 4,
+                      WebkitBoxOrient: "vertical",
                     }}
                   >
                     {note.content}
@@ -110,9 +180,9 @@ const UserNotes = () => {
                     variant="caption"
                     sx={{
                       color: "rgba(255,255,255,0.6)",
-                      mt: "auto",
                       display: "block",
                       textAlign: "right",
+                      fontSize: { xs: "0.75rem", sm: "0.8rem" },
                     }}
                   >
                     {new Date(note.createdAt).toLocaleString()}
@@ -123,6 +193,11 @@ const UserNotes = () => {
           ))}
         </Grid>
       )}
+      <ViewNote
+        open={!!selectedNote}
+        onClose={() => setSelectedNote(null)}
+        note={selectedNote}
+      />
     </Container>
   );
 };
