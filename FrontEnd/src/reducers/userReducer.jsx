@@ -5,7 +5,6 @@ const UserReducer = (state, action) => {
     case "Get current user":
       try {
         const user = JSON.parse(localStorage.getItem("currentUser"));
-        console.log(user);
 
         return user;
       } catch (e) {
@@ -15,7 +14,8 @@ const UserReducer = (state, action) => {
 
     case "Log Out":
       localStorage.removeItem("currentUser");
-      break;
+      return { ...state, ...{} };
+
     default:
       return state;
   }

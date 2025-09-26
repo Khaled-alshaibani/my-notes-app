@@ -9,7 +9,14 @@ import {
   TextareaAutosize,
   TextField,
   DialogActions,
+  Avatar,
+  Divider
 } from "@mui/material";
+
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
+import CloseIcon from "@mui/icons-material/Close";
+import SaveIcon from "@mui/icons-material/Save";
 
 const ViewNote = ({ open, onClose, note }) => {
   const [isEditing, setIsEditing] = useState(false);
@@ -46,8 +53,10 @@ const ViewNote = ({ open, onClose, note }) => {
         <DialogTitle
           sx={{
             fontWeight: "bold",
-            textAlign: "center",
+            textAlign: "start",
             color: "#90caf9",
+            display: "flex",
+            justifyContent: "space-between",
           }}
         >
           {isEditing ? (
@@ -67,12 +76,60 @@ const ViewNote = ({ open, onClose, note }) => {
           ) : (
             note?.title || "Untitled"
           )}
+
+          <Box sx={{ display: "flex" }}>
+            {isEditing ? (
+              <Button
+                size="small"
+                onClick={handleSave}
+                sx={{ mr: 1, bgcolor: "white" }}
+              >
+                <SaveIcon />
+              </Button>
+            ) : (
+              <Avatar
+                onClick={handleEdit}
+                sx={{
+                  mr: 1,
+                  width: 40,
+                  height: 40,
+                  bgcolor: "transparent",
+                  color: "#1976d2",
+                  border: "1px solid #1976d2",
+                  cursor: "pointer",
+                  "&:hover": {
+                    bgcolor: "#1976d2",
+                    color: "white",
+                  },
+                }}
+              >
+                <EditIcon fontSize="small" />
+              </Avatar>
+            )}
+            <Avatar
+              onClick={handleDelete}
+              sx={{
+                width: 40,
+                height: 40,
+                bgcolor: "transparent",
+                color: "#d32f2f",
+                border: "1px solid #d32f2f",
+                cursor: "pointer",
+                "&:hover": {
+                  bgcolor: "#d32f2f",
+                  color: "white",
+                },
+              }}
+            >
+              <DeleteIcon fontSize="small" />
+            </Avatar>
+          </Box>
         </DialogTitle>
 
-        <DialogContent
-          dividers
-          sx={{ borderColor: "rgba(255,255,255,0.2)", pb: 2 }}
-        >
+        
+        <Divider sx={{ borderColor: "rgba(255,255,255,0.2)" }} />
+
+        <DialogContent sx={{ pb: 2 }}>
           {isEditing ? (
             <TextareaAutosize
               value={editedContent}
@@ -116,53 +173,15 @@ const ViewNote = ({ open, onClose, note }) => {
           >
             {note?.createdAt ? new Date(note.createdAt).toLocaleString() : ""}
           </Typography>
-        </DialogContent>
-
-        <DialogActions sx={{ justifyContent: "space-between", px: 3, pb: 2 }}>
-          <Box>
-            {isEditing ? (
-              <Button
-                variant="contained"
-                size="small"
-                onClick={handleSave}
-                sx={{ mr: 1, bgcolor: "#1976d2" }}
-              >
-                Save
-              </Button>
-            ) : (
-              <Button
-                variant="outlined"
-                size="small"
-                onClick={handleEdit}
-                sx={{
-                  mr: 1,
-                  color: "#90caf9",
-                  borderColor: "#90caf9",
-                  "&:hover": { borderColor: "#42a5f5", color: "#42a5f5" },
-                }}
-              >
-                Edit
-              </Button>
-            )}
-            <Button
-              variant="outlined"
-              size="small"
-              color="error"
-              onClick={handleDelete}
-            >
-              Delete
-            </Button>
-          </Box>
-
           <Button
             variant="text"
             size="small"
             onClick={onClose}
-            sx={{ color: "rgba(255,255,255,0.7)" }}
+            sx={{ color: "rgba(255,255,255,0.7)", textAlign: "end" }}
           >
-            Close
+            <CloseIcon />
           </Button>
-        </DialogActions>
+        </DialogContent>
       </Dialog>
 
       {/* Confirm delete dialog */}

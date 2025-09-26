@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import GetNotes from "../middleware/getNotes";
-import { useNotes } from "../contexts/notesContext";
-import { useDispatch } from "../contexts/notesContext";
+import { useNotes, useDispatch } from "../contexts/notesContext";
 import {
   Container,
   Typography,
@@ -16,37 +15,34 @@ import ViewNote from "./veiwNote";
 import AddNoteDialog from "./addNote";
 
 const UserNotes = () => {
-  const [selectedNote, setSelectedNote] = useState();
+  const [selectedNote, setSelectedNote] = useState(null);
   const [open, setOpen] = useState(false);
 
+  const notes = useNotes();
   const notesDispatch = useDispatch();
-
-  const handleAddNote = () => {
-    // Todo: do this later.
-  };
+  const user = JSON.parse(localStorage.getItem("currentUser"));
 
   useEffect(() => {
     const fetchNotes = async () => {
       const data = await GetNotes();
-      notesDispatch({ type: "Get", payload: { data: data } });
+
+      notesDispatch({ type: "Get", payload: data.notes });
     };
     fetchNotes();
-  }, []);
+  }, [notesDispatch]);
 
-  let notes = useNotes();
-  const user = JSON.parse(localStorage.getItem("currentUser"));
-
-  notes = Array.isArray(notes)
-    ? notes
-    : Array.isArray(notes?.notes)
-    ? notes.notes
-    : [];
+  console.log(notes);
 
   const username =
-    notes.length > 0 ? notes[0].user?.name || user.userName : "No User";
+    notes.length > 0 ? notes[0].user?.name || user?.userName : "No User";
+
+  const handleAddNote = () => {};
 
   return (
-    <Container maxWidth="lg" sx={{ mt: 5, mb: 5 }}>
+    <Container
+      maxWidth="lg"
+      sx={{ mt: 5, mb: 5, height: "100vh", overflowY: "auto" }}
+    >
       <Box
         sx={{
           display: "flex",
@@ -84,6 +80,7 @@ const UserNotes = () => {
         >
           Add Note
         </Button>
+
         <AddNoteDialog
           open={open}
           onClose={() => setOpen(false)}
@@ -103,25 +100,16 @@ const UserNotes = () => {
           No notes available yet.
         </Typography>
       ) : (
-        <Grid
-          container
-          spacing={3}
-          justifyContent="center"
-          sx={{ width: "100%", margin: 0 }}
-        >
-          {notes.map((note, index) => (
+        <Grid container spacing={3} justifyContent="center">
+          {[...notes].reverse().map((note, index) => (
             <Grid
               onClick={() => setSelectedNote(note)}
               item
               key={index}
-              size={4}
               xs={12}
               sm={6}
               md={4}
-              sx={{
-                display: "flex",
-                justifyContent: "center",
-              }}
+              sx={{ display: "flex", justifyContent: "center" }}
             >
               <Card
                 sx={{
@@ -134,20 +122,13 @@ const UserNotes = () => {
                     transform: "translateY(-4px)",
                     boxShadow: "0 6px 15px rgba(0,0,0,0.4)",
                   },
-                  height: "100%",
                   display: "flex",
                   flexDirection: "column",
                   width: "100%",
                   maxWidth: { xs: "100%", sm: "350px", md: "100%" },
                 }}
               >
-                <CardContent
-                  sx={{
-                    flexGrow: 1,
-                    p: { xs: 2, sm: 2.5 },
-                    "&:last-child": { pb: { xs: 2, sm: 2.5 } },
-                  }}
-                >
+                <CardContent sx={{ flexGrow: 1, p: 2 }}>
                   <Typography
                     variant="h6"
                     sx={{
@@ -155,7 +136,6 @@ const UserNotes = () => {
                       borderBottom: "1px solid rgba(255,255,255,0.2)",
                       pb: 1,
                       mb: 2,
-                      fontSize: { xs: "1.1rem", sm: "1.2rem" },
                       wordBreak: "break-word",
                     }}
                   >
@@ -164,14 +144,13 @@ const UserNotes = () => {
                   <Typography
                     sx={{
                       color: "rgba(255,255,255,0.9)",
-                      fontSize: { xs: "0.9rem", sm: "0.95rem" },
-                      mb: 2,
                       lineHeight: 1.5,
                       wordBreak: "break-word",
                       overflow: "hidden",
                       display: "-webkit-box",
                       WebkitLineClamp: 4,
                       WebkitBoxOrient: "vertical",
+                      mb: 2,
                     }}
                   >
                     {note.content}
@@ -182,7 +161,6 @@ const UserNotes = () => {
                       color: "rgba(255,255,255,0.6)",
                       display: "block",
                       textAlign: "right",
-                      fontSize: { xs: "0.75rem", sm: "0.8rem" },
                     }}
                   >
                     {new Date(note.createdAt).toLocaleString()}
@@ -193,6 +171,7 @@ const UserNotes = () => {
           ))}
         </Grid>
       )}
+
       <ViewNote
         open={!!selectedNote}
         onClose={() => setSelectedNote(null)}

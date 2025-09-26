@@ -2,24 +2,26 @@ import * as React from "react";
 import CssBaseline from "@mui/material/CssBaseline";
 import Container from "@mui/material/Container";
 import Typography from "@mui/material/Typography";
-import { useNotes } from "../contexts/notesContext";
+import { useNotes, useDispatch } from "../contexts/notesContext";
 import { useEffect } from "react";
-import { useDispatch } from "../contexts/userContext";
+
 import GetNotes from "../middleware/getNotes";
 import NoteCard from "./noteCard";
 
 export default function NoteAbriviated() {
   const notesDispatch = useDispatch();
+  let notes = useNotes();
 
   useEffect(() => {
     const fetchNotes = async () => {
       const data = await GetNotes();
-      notesDispatch({ type: "Get", payload: { data: data } });
+
+      notesDispatch({ type: "Get", payload: data.notes });
     };
     fetchNotes();
-  }, []);
+  }, [notesDispatch]);
 
-  let notes = useNotes();
+  console.log(notes);
 
   notes = Array.isArray(notes)
     ? notes
@@ -71,6 +73,7 @@ export default function NoteAbriviated() {
         ) : (
           latestNotes.map((note, index) => (
             <NoteCard
+            
               key={index}
               title={note.title}
               content={note.content}

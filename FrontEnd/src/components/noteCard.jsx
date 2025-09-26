@@ -32,6 +32,9 @@ export default function NoteCard({ title, content, createdAt }) {
             borderBottom: "2px solid rgba(255,255,255,0.2)",
             pb: 1,
             mb: 2,
+            maxHeight: 120,
+            overflow: "hidden",
+            textOverflow: "ellipsis",
           }}
         >
           {title}
