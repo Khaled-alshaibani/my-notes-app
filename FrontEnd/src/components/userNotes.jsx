@@ -16,7 +16,7 @@ import AddNoteDialog from "./addNote";
 
 const UserNotes = () => {
   const [selectedNote, setSelectedNote] = useState(null);
-  const [open, setOpen] = useState(false);
+  const [openAddDialog, setOpenAddDialog] = useState(false);
 
   const notes = useNotes();
   const notesDispatch = useDispatch();
@@ -25,23 +25,24 @@ const UserNotes = () => {
   useEffect(() => {
     const fetchNotes = async () => {
       const data = await GetNotes();
-
-      notesDispatch({ type: "Get", payload: data.notes });
+      // ترتيب حسب آخر تحديث أو إنشاء
+      const sortedNotes = [...data.notes].sort((a, b) => {
+        const dateA = new Date(a.updatedAt || a.createdAt);
+        const dateB = new Date(b.updatedAt || b.createdAt);
+        return dateB - dateA;
+      });
+      notesDispatch({ type: "Get", payload: sortedNotes });
     };
     fetchNotes();
   }, [notesDispatch]);
 
-  console.log(notes);
-
   const username =
     notes.length > 0 ? notes[0].user?.name || user?.userName : "No User";
-
-  const handleAddNote = () => {};
 
   return (
     <Container
       maxWidth="lg"
-      sx={{ mt: 5, mb: 5, height: "100vh", overflowY: "auto" }}
+      sx={{ mt: 5, mb: 5, height: "100vh", overflowY: "auto", pb: 20 }}
     >
       <Box
         sx={{
@@ -76,15 +77,14 @@ const UserNotes = () => {
             "&:hover": { bgcolor: "#1565c0" },
             order: { xs: 1, sm: 2 },
           }}
-          onClick={() => setOpen(true)}
+          onClick={() => setOpenAddDialog(true)}
         >
           Add Note
         </Button>
 
         <AddNoteDialog
-          open={open}
-          onClose={() => setOpen(false)}
-          onSave={handleAddNote}
+          open={openAddDialog}
+          onClose={() => setOpenAddDialog(false)}
         />
       </Box>
 
@@ -101,11 +101,10 @@ const UserNotes = () => {
         </Typography>
       ) : (
         <Grid container spacing={3} justifyContent="center">
-          {[...notes].reverse().map((note, index) => (
+          {notes.map((note) => (
             <Grid
-              onClick={() => setSelectedNote(note)}
               item
-              key={index}
+              key={note._id}
               xs={12}
               sm={6}
               md={4}
@@ -126,7 +125,9 @@ const UserNotes = () => {
                   flexDirection: "column",
                   width: "100%",
                   maxWidth: { xs: "100%", sm: "350px", md: "100%" },
+                  cursor: "pointer",
                 }}
+                onClick={() => setSelectedNote(note)}
               >
                 <CardContent sx={{ flexGrow: 1, p: 2 }}>
                   <Typography
@@ -163,7 +164,9 @@ const UserNotes = () => {
                       textAlign: "right",
                     }}
                   >
-                    {new Date(note.createdAt).toLocaleString()}
+                    {new Date(
+                      note.updatedAt || note.createdAt
+                    ).toLocaleString()}
                   </Typography>
                 </CardContent>
               </Card>

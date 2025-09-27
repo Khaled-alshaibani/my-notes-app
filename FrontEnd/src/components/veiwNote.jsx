@@ -10,8 +10,14 @@ import {
   TextField,
   DialogActions,
   Avatar,
-  Divider
+  Divider,
 } from "@mui/material";
+
+import updateNote from "../middleware/updateNote";
+import deleteNote from "../middleware/deleteNote";
+import { useUser } from "../contexts/userContext";
+import { useDispatch } from "../contexts/notesContext";
+import { useEffect } from "react";
 
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -24,13 +30,49 @@ const ViewNote = ({ open, onClose, note }) => {
   const [editedContent, setEditedContent] = useState(note?.content || "");
   const [confirmDelete, setConfirmDelete] = useState(false);
 
+  const user = useUser();
+  const dispatch = useDispatch();
+
   const handleEdit = () => setIsEditing(true);
-  const handleSave = () => {
-    setIsEditing(false);
+
+  const handleSave = async () => {
+    try {
+      const res = await updateNote({
+        token: user.token,
+        noteID: note._id,
+        title: editedTitle,
+        content: editedContent,
+      });
+
+      if (res.success) {
+        dispatch({ type: "update", payload: res.updatedNote });
+        setIsEditing(false);
+        onClose();
+      }
+    } catch (e) {
+      console.error("Failed to update note:", e.response?.data || e.message);
+    }
   };
+
+  useEffect(() => {
+    if (open) {
+      setEditedTitle(note?.title || "");
+      setEditedContent(note?.content || "");
+      setIsEditing(false);
+    }
+  }, [open, note]);
+
   const handleDelete = () => setConfirmDelete(true);
-  const handleConfirmDelete = () => {
-    setConfirmDelete(false);
+
+  const handleConfirmDelete = async () => {
+    try {
+      await deleteNote({ token: user.token, noteID: note.id });
+      dispatch({ type: "delete", payload: note.id });
+      setConfirmDelete(false);
+      onClose();
+    } catch (e) {
+      console.error(e);
+    }
   };
 
   return (
@@ -79,13 +121,21 @@ const ViewNote = ({ open, onClose, note }) => {
 
           <Box sx={{ display: "flex" }}>
             {isEditing ? (
-              <Button
-                size="small"
+              <Avatar
                 onClick={handleSave}
-                sx={{ mr: 1, bgcolor: "white" }}
+                sx={{
+                  mr: 1,
+                  width: 40,
+                  height: 40,
+                  bgcolor: "transparent",
+                  color: "#4caf50",
+                  border: "1px solid #4caf50",
+                  cursor: "pointer",
+                  "&:hover": { bgcolor: "#4caf50", color: "white" },
+                }}
               >
-                <SaveIcon />
-              </Button>
+                <SaveIcon fontSize="small" />
+              </Avatar>
             ) : (
               <Avatar
                 onClick={handleEdit}
@@ -97,10 +147,7 @@ const ViewNote = ({ open, onClose, note }) => {
                   color: "#1976d2",
                   border: "1px solid #1976d2",
                   cursor: "pointer",
-                  "&:hover": {
-                    bgcolor: "#1976d2",
-                    color: "white",
-                  },
+                  "&:hover": { bgcolor: "#1976d2", color: "white" },
                 }}
               >
                 <EditIcon fontSize="small" />
@@ -115,10 +162,7 @@ const ViewNote = ({ open, onClose, note }) => {
                 color: "#d32f2f",
                 border: "1px solid #d32f2f",
                 cursor: "pointer",
-                "&:hover": {
-                  bgcolor: "#d32f2f",
-                  color: "white",
-                },
+                "&:hover": { bgcolor: "#d32f2f", color: "white" },
               }}
             >
               <DeleteIcon fontSize="small" />
@@ -126,7 +170,6 @@ const ViewNote = ({ open, onClose, note }) => {
           </Box>
         </DialogTitle>
 
-        
         <Divider sx={{ borderColor: "rgba(255,255,255,0.2)" }} />
 
         <DialogContent sx={{ pb: 2 }}>
