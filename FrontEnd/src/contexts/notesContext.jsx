@@ -18,4 +18,4 @@ export const NotesProvider = ({ children }) => {
 };
 
 export const useNotes = () => useContext(NotesContext);
-export const useDispatch = () => useContext(DispatchContext);
+export const useNotesDispatch = () => useContext(DispatchContext);

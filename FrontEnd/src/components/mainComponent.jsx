@@ -3,12 +3,12 @@ import Typography from "@mui/material/Typography";
 
 import NoteAbriviated from "./noteAbriviated";
 import GetNotes from "../middleware/getNotes";
-import { useDispatch } from "../contexts/notesContext";
+import { useNotesDispatch } from "../contexts/notesContext";
 import { useEffect } from "react";
 import NavBar from "./navBar";
 
 const MainComponent = () => {
-  const notesDispatch = useDispatch();
+  const notesDispatch = useNotesDispatch();
 
   useEffect(() => {
     const fetchNotes = async () => {

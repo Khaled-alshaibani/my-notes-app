@@ -11,7 +11,7 @@ import validator from "validator";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import sign_up from "../middleware/sign_up";
-import { useDispatch } from "../contexts/userContext";
+import { useUserDispatch } from "../contexts/userContext";
 
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
@@ -30,7 +30,7 @@ export default function SignUp() {
   });
 
   const [show, setShow] = useState(false);
-  const dispatch = useDispatch();
+  const dispatch = useUserDispatch();
   const navigator = useNavigate();
 
   function validate() {

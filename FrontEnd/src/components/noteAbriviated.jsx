@@ -2,14 +2,14 @@ import * as React from "react";
 import CssBaseline from "@mui/material/CssBaseline";
 import Container from "@mui/material/Container";
 import Typography from "@mui/material/Typography";
-import { useNotes, useDispatch } from "../contexts/notesContext";
+import { useNotes, useNotesDispatch } from "../contexts/notesContext";
 import { useEffect } from "react";
 
 import GetNotes from "../middleware/getNotes";
 import NoteCard from "./noteCard";
 
 export default function NoteAbriviated() {
-  const notesDispatch = useDispatch();
+  const notesDispatch = useNotesDispatch();
   let notes = useNotes();
 
   useEffect(() => {
@@ -26,8 +26,8 @@ export default function NoteAbriviated() {
   notes = Array.isArray(notes)
     ? notes
     : Array.isArray(notes?.notes)
-    ? notes.notes
-    : [];
+      ? notes.notes
+      : [];
 
   const latestNotes = [...notes]
     .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
@@ -73,7 +73,6 @@ export default function NoteAbriviated() {
         ) : (
           latestNotes.map((note, index) => (
             <NoteCard
-            
               key={index}
               title={note.title}
               content={note.content}

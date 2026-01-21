@@ -14,7 +14,11 @@ const UserReducer = (state, action) => {
 
     case "Log Out":
       localStorage.removeItem("currentUser");
-      return { ...state, ...{} };
+      return {
+        token: null,
+        userName: null,
+        notes: [],
+      };
 
     default:
       return state;

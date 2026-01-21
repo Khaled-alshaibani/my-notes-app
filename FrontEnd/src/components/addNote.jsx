@@ -12,24 +12,28 @@ import {
 
 import addNote from "../middleware/addNote";
 import { useUser } from "../contexts/userContext";
-import { useDispatch } from "../contexts/notesContext";
+import { useNotesDispatch } from "../contexts/notesContext";
+import LoadingOverlay from "./loading";
+import { useState } from "react";
 
 export default function AddNoteDialog({ open, onClose }) {
   const [title, setTitle] = React.useState("");
   const [content, setContent] = React.useState("");
+  const [loading, setLoading] = useState(false);
 
   const user = useUser();
-  const dispatch = useDispatch();
+  const dispatch = useNotesDispatch();
 
   const handleSave = async () => {
     if (!title.trim() || !content.trim()) return;
 
     try {
-      const res = await addNote({ user, title, content });
-      console.log("addNote response", res);
+      setLoading(true);
+      const req = await addNote({ user, title, content });
+      console.log("addNote response", req);
 
       const newNote = {
-        _id: res.id || Date.now().toString(),
+        _id: req.id || Date.now().toString(),
         title,
         content,
         creator: user?.id || user?.userName,
@@ -39,17 +43,17 @@ export default function AddNoteDialog({ open, onClose }) {
       dispatch({ type: "add", payload: newNote });
       setTitle("");
       setContent("");
+      setLoading(false);
       onClose();
     } catch (e) {
       console.log("Failed adding note: ", e);
     }
   };
 
-  console.log(user);
-
   return (
     <>
-      {user ? (
+      <LoadingOverlay open={loading} />
+      {user?.token ? (
         <Dialog
           open={open}
           onClose={onClose}

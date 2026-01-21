@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -10,31 +10,87 @@ import {
   TextField,
   DialogActions,
   Avatar,
-  Divider
+  Divider,
 } from "@mui/material";
 
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import CloseIcon from "@mui/icons-material/Close";
 import SaveIcon from "@mui/icons-material/Save";
+import updateNote from "../middleware/updateNote";
+import { useUser } from "../contexts/userContext";
+import { useNotesDispatch } from "../contexts/notesContext";
+import deleteNote from "../middleware/deleteNote";
+import LoadingOverlay from "./loading";
 
 const ViewNote = ({ open, onClose, note }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editedTitle, setEditedTitle] = useState(note?.title || "");
   const [editedContent, setEditedContent] = useState(note?.content || "");
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const user = useUser();
+  const notesDispatch = useNotesDispatch();
 
-  const handleEdit = () => setIsEditing(true);
-  const handleSave = () => {
+  useEffect(() => {
+    setEditedTitle(note?.title);
+    setEditedContent(note?.content);
     setIsEditing(false);
-  };
-  const handleDelete = () => setConfirmDelete(true);
-  const handleConfirmDelete = () => {
-    setConfirmDelete(false);
-  };
+  }, [note]);
 
+  const handleEdit = () => {
+    setIsEditing(true);
+  };
+  const handleSave = async () => {
+    setIsEditing(false);
+
+    if (!editedTitle.trim() || !editedContent.trim()) return;
+
+    try {
+      console.log("before sending any thing to the server", note);
+      setLoading(true);
+      const updatedNote = await updateNote({
+        user,
+        note: {
+          ...note,
+          id: note._id,
+          title: editedTitle,
+          content: editedContent,
+        },
+      });
+
+      notesDispatch({
+        type: "update",
+        payload: { note: updatedNote.updatedNote },
+      });
+      onClose();
+
+      console.log("after sending to the server and reducer: ", updatedNote);
+      setLoading(false);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  const handleDelete = async () => {
+    setConfirmDelete(true);
+  };
+  const handleConfirmDelete = async () => {
+    try {
+      setLoading(true);
+      const deletedNote = await deleteNote({ user, id: note._id });
+      notesDispatch({ type: "delete", payload: { id: note._id } });
+      console.log("Tu has eliminado esta nota", deletedNote);
+      window.location.reload();
+    } catch (error) {
+      console.log(error);
+    }
+    setConfirmDelete(false);
+    setLoading(false);
+    onClose();
+  };
   return (
     <>
+      <LoadingOverlay open={loading} />
       <Dialog
         open={open}
         onClose={onClose}
@@ -79,13 +135,13 @@ const ViewNote = ({ open, onClose, note }) => {
 
           <Box sx={{ display: "flex" }}>
             {isEditing ? (
-              <Button
+              <Avatar
                 size="small"
                 onClick={handleSave}
-                sx={{ mr: 1, bgcolor: "white" }}
+                sx={{ mr: 1, bgcolor: "#1976d2", cursor: "pointer" }}
               >
                 <SaveIcon />
-              </Button>
+              </Avatar>
             ) : (
               <Avatar
                 onClick={handleEdit}
@@ -126,7 +182,6 @@ const ViewNote = ({ open, onClose, note }) => {
           </Box>
         </DialogTitle>
 
-        
         <Divider sx={{ borderColor: "rgba(255,255,255,0.2)" }} />
 
         <DialogContent sx={{ pb: 2 }}>
