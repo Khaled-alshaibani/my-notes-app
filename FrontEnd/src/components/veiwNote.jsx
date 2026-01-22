@@ -13,6 +13,12 @@ import {
   Divider,
 } from "@mui/material";
 
+import updateNote from "../middleware/updateNote";
+import deleteNote from "../middleware/deleteNote";
+import { useUser } from "../contexts/userContext";
+import { useDispatch } from "../contexts/notesContext";
+import { useEffect } from "react";
+
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import CloseIcon from "@mui/icons-material/Close";
@@ -32,61 +38,49 @@ const ViewNote = ({ open, onClose, note }) => {
   const user = useUser();
   const notesDispatch = useNotesDispatch();
 
-  useEffect(() => {
-    setEditedTitle(note?.title);
-    setEditedContent(note?.content);
-    setIsEditing(false);
-  }, [note]);
+  const user = useUser();
+  const dispatch = useDispatch();
 
-  const handleEdit = () => {
-    setIsEditing(true);
-  };
+  const handleEdit = () => setIsEditing(true);
+
   const handleSave = async () => {
-    setIsEditing(false);
-
-    if (!editedTitle.trim() || !editedContent.trim()) return;
-
     try {
-      console.log("before sending any thing to the server", note);
-      setLoading(true);
-      const updatedNote = await updateNote({
-        user,
-        note: {
-          ...note,
-          id: note._id,
-          title: editedTitle,
-          content: editedContent,
-        },
+      const res = await updateNote({
+        token: user.token,
+        noteID: note._id,
+        title: editedTitle,
+        content: editedContent,
       });
 
-      notesDispatch({
-        type: "update",
-        payload: { note: updatedNote.updatedNote },
-      });
-      onClose();
-
-      console.log("after sending to the server and reducer: ", updatedNote);
-      setLoading(false);
-    } catch (error) {
-      console.log(error);
+      if (res.success) {
+        dispatch({ type: "update", payload: res.updatedNote });
+        setIsEditing(false);
+        onClose();
+      }
+    } catch (e) {
+      console.error("Failed to update note:", e.response?.data || e.message);
     }
   };
-  const handleDelete = async () => {
-    setConfirmDelete(true);
-  };
+
+  useEffect(() => {
+    if (open) {
+      setEditedTitle(note?.title || "");
+      setEditedContent(note?.content || "");
+      setIsEditing(false);
+    }
+  }, [open, note]);
+
+  const handleDelete = () => setConfirmDelete(true);
+
   const handleConfirmDelete = async () => {
     try {
-      setLoading(true);
-      const deletedNote = await deleteNote({ user, id: note._id });
-      notesDispatch({ type: "delete", payload: { id: note._id } });
-      console.log("Tu has eliminado esta nota", deletedNote);
-      window.location.reload();
-    } catch (error) {
-      console.log(error);
+      await deleteNote({ token: user.token, noteID: note.id });
+      dispatch({ type: "delete", payload: note.id });
+      setConfirmDelete(false);
+      onClose();
+    } catch (e) {
+      console.error(e);
     }
-    setConfirmDelete(false);
-    setLoading(false);
-    onClose();
   };
   return (
     <>
@@ -136,11 +130,19 @@ const ViewNote = ({ open, onClose, note }) => {
           <Box sx={{ display: "flex" }}>
             {isEditing ? (
               <Avatar
-                size="small"
                 onClick={handleSave}
-                sx={{ mr: 1, bgcolor: "#1976d2", cursor: "pointer" }}
+                sx={{
+                  mr: 1,
+                  width: 40,
+                  height: 40,
+                  bgcolor: "transparent",
+                  color: "#4caf50",
+                  border: "1px solid #4caf50",
+                  cursor: "pointer",
+                  "&:hover": { bgcolor: "#4caf50", color: "white" },
+                }}
               >
-                <SaveIcon />
+                <SaveIcon fontSize="small" />
               </Avatar>
             ) : (
               <Avatar
@@ -153,10 +155,7 @@ const ViewNote = ({ open, onClose, note }) => {
                   color: "#1976d2",
                   border: "1px solid #1976d2",
                   cursor: "pointer",
-                  "&:hover": {
-                    bgcolor: "#1976d2",
-                    color: "white",
-                  },
+                  "&:hover": { bgcolor: "#1976d2", color: "white" },
                 }}
               >
                 <EditIcon fontSize="small" />
@@ -171,10 +170,7 @@ const ViewNote = ({ open, onClose, note }) => {
                 color: "#d32f2f",
                 border: "1px solid #d32f2f",
                 cursor: "pointer",
-                "&:hover": {
-                  bgcolor: "#d32f2f",
-                  color: "white",
-                },
+                "&:hover": { bgcolor: "#d32f2f", color: "white" },
               }}
             >
               <DeleteIcon fontSize="small" />

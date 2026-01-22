@@ -9,11 +9,11 @@ const NotesReducer = (notes = [], action) => {
     case "update":
       console.log(action);
       return notes.map((n) =>
-        n._id === action.payload.note._id ? action.payload.note : n,
+        n._id === action.payload._id ? action.payload : n
       );
 
     case "delete":
-      return notes.filter((n) => n.id !== action.payload);
+      return notes.filter((n) => n._id !== action.payload);
 
     case "clear":
       return [];
