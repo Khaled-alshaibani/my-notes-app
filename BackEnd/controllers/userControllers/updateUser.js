@@ -2,7 +2,7 @@
 import bcrypt from "bcryptjs";
 
 // * MODELS
-import User from "./models/user.model.js";
+import User from "../../models/user.model.js";
 
 export const UpdateUser = async (req, res) => {
   try {

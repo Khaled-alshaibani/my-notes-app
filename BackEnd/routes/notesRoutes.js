@@ -1,10 +1,11 @@
 import express from "express";
-import { AddNote } from "../controllers/noteControllers/addNote";
-import { ClearNote } from "../controllers/noteControllers/clearNote";
-import { DeleteNote } from "../controllers/noteControllers/deleteNote";
-import { GetAllNotes } from "../controllers/noteControllers/getAllNotes";
-import { GetUserNotes } from "../controllers/noteControllers/getUserNotes";
-import { UpdateNote } from "../controllers/noteControllers/updateNote";
+import { AddNote } from "../controllers/noteControllers/addNote.js";
+import { ClearNote } from "../controllers/noteControllers/clearNote.js";
+import { DeleteNote } from "../controllers/noteControllers/deleteNote.js";
+import { GetAllNotes } from "../controllers/noteControllers/getAllNotes.js";
+import { GetUserNotes } from "../controllers/noteControllers/getUserNotes.js";
+import { UpdateNote } from "../controllers/noteControllers/updateNote.js";
+import { protect } from "../middleware/auth.js";
 
 const notesRouter = express.Router();
 

@@ -27,7 +27,6 @@ import DialogTitle from "@mui/material/DialogTitle";
 import Slide from "@mui/material/Slide";
 import AddNoteDialog from "./addNote";
 
-
 const drawerWidth = 240;
 const navItems = [
   { label: "Home", path: "/" },
@@ -150,7 +149,7 @@ function NavBar(props) {
             </Typography>
             {currentUser ? (
               <>
-                <Typography sx={{ mr: 3, fontSize: 12, fontWeight: "bold" }}>
+                <Typography sx={{ mr: 3, fontSize: 14, fontWeight: "bold" }}>
                   {currentUser.userName}
                 </Typography>
                 <NavLink
@@ -206,7 +205,7 @@ function NavBar(props) {
               </NavLink>
             ))}
             <Button
-              sx={{ color: "white" }}
+              sx={{ color: "white", ml: 2 }}
               onClick={() => setOpenAddNoteDialog(true)}
             >
               New Note

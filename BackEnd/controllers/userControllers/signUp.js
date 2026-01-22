@@ -3,10 +3,10 @@ import bcrypt from "bcryptjs";
 
 
 // * MODELS
-import User from "./models/user.model.js";
+import User from "../../models/user.model.js";
 
 // * EXTERNAL FUNCTIONS
-import generateToken from "./utils/generateToken.js";
+import generateToken from "../../utils/generateToken.js";
 
 
 

@@ -1,12 +1,12 @@
 // * PACKAGES
 import express from "express";
-import { SignUp } from "../controllers/userControllers/signUp";
-import { Login } from "../controllers/userControllers/login";
-import { UpdateUser } from "../controllers/userControllers/updateUser";
-import { DeleteUser } from "../controllers/userControllers/deleteUser";
-import { GetUsers } from "../controllers/userControllers/getAllUsers";
+import { SignUp} from "../controllers/userControllers/signUp.js"
+import { Login } from "../controllers/userControllers/login.js";
+import { UpdateUser } from "../controllers/userControllers/updateUser.js";
+import { DeleteUser } from "../controllers/userControllers/deleteUser.js";
+import { GetUsers } from "../controllers/userControllers/getAllUsers.js";
 
-const usersRouter = express.Router;
+const usersRouter = express.Router();
 
 usersRouter.post("/SignUp", SignUp);
 usersRouter.post("/Login", Login);

@@ -1,8 +1,5 @@
 // * MODELS
-import Note from "./models/note.model.js";
-
-// * EXTERNAL FUNCTIONS
-import { protect } from "./middleware/auth.js";
+import Note from "../../models/note.model.js";
 
 export const ClearNote = async (req, res) => {
   try {

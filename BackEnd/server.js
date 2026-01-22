@@ -1,19 +1,12 @@
 // * PACKAGES
 import express from "express";
 import dotenv from "dotenv";
-import crypto from "crypto";
-import bcrypt from "bcryptjs";
 import cors from "cors";
-
-// * MODELS
-import User from "./models/user.model.js";
-import Note from "./models/note.model.js";
 
 // * EXTERNAL FUNCTIONS
 import { connectDB } from "./config/db.js";
-import generateToken from "./utils/generateToken.js";
-import { protect } from "./middleware/auth.js";
 import usersRouter from "./routes/userRoutes.js";
+import notesRouter from "./routes/notesRoutes.js";
 
 // * =============== INITIALIZATIONS ================
 dotenv.config();
