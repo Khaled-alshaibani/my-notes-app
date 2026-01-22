@@ -12,10 +12,11 @@ import ListItemText from "@mui/material/ListItemText";
 import MenuIcon from "@mui/icons-material/Menu";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
-import { NavLink, useNavigate } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 import CardMedia from "@mui/material/CardMedia";
 import { useEffect, useState } from "react";
-import { useUser, useDispatch } from "../contexts/userContext";
+import { useUser, useUserDispatch } from "../contexts/userContext";
+import { useNotesDispatch } from "../contexts/notesContext";
 import ValidateToken from "../middleware/validateToken";
 import Button from "@mui/material/Button";
 import Slide from "@mui/material/Slide";
@@ -39,12 +40,14 @@ const Transition = React.forwardRef(function Transition(props, ref) {
 function NavBar(props) {
   const user = useUser();
   const [currentUser, setCurrentUser] = useState(null);
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
-
+  const userdispatch = useUserDispatch();
+  const notesdispatch = useNotesDispatch();
+  const [openAddNoteDialog, setOpenAddNoteDialog] = useState(false);
   useEffect(() => {
-    dispatch({ type: "Get current user" });
+    userdispatch({ type: "Get current user" });
   }, []);
+
+  console.log(user);
 
   useEffect(() => {
     if (user?.token) {
@@ -65,9 +68,11 @@ function NavBar(props) {
   };
   const handleCloseDialog = () => setOpenDialog(false);
   const handleConfirmLogout = () => {
-    dispatch({ type: "Log Out" });
+    userdispatch({ type: "Log Out" });
     setOpenDialog(false);
-    navigate("/");
+    setCurrentUser(null);
+    notesdispatch({ type: "clear" });
+    window.location.reload();
   };
 
   const drawer = (
@@ -104,6 +109,12 @@ function NavBar(props) {
           </ListItem>
         )}
       </List>
+      <Button
+        sx={{ color: "white" }}
+        onClick={() => setOpenAddNoteDialog(true)}
+      >
+        New Note
+      </Button>
     </Box>
   );
 
@@ -269,6 +280,10 @@ function NavBar(props) {
           </Button>
         </DialogActions>
       </Dialog>
+      <AddNoteDialog
+        open={openAddNoteDialog}
+        onClose={() => setOpenAddNoteDialog(false)}
+      />
     </Box>
   );
 }

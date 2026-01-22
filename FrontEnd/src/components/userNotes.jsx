@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import GetNotes from "../middleware/getNotes";
-import { useNotes, useDispatch } from "../contexts/notesContext";
+import { useNotes, useNotesDispatch } from "../contexts/notesContext";
 import {
   Container,
   Typography,
@@ -19,7 +19,7 @@ const UserNotes = () => {
   const [openAddDialog, setOpenAddDialog] = useState(false);
 
   const notes = useNotes();
-  const notesDispatch = useDispatch();
+  const notesDispatch = useNotesDispatch();
   const user = JSON.parse(localStorage.getItem("currentUser"));
 
   useEffect(() => {
@@ -57,13 +57,24 @@ const UserNotes = () => {
         <Typography
           variant="h5"
           sx={{
-            fontWeight: "bold",
-            color: "white",
-            order: { xs: 2, sm: 1 },
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            mb: 4,
+            flexDirection: { xs: "column", sm: "row" },
+            gap: { xs: 2, sm: 0 },
           }}
         >
-          {username}'s Notes
-        </Typography>
+          <Typography
+            variant="h5"
+            sx={{
+              fontWeight: "bold",
+              color: "white",
+              order: { xs: 2, sm: 1 },
+            }}
+          >
+            {username}'s Notes
+          </Typography>
 
         <Button
           variant="contained"
@@ -175,12 +186,13 @@ const UserNotes = () => {
         </Grid>
       )}
 
-      <ViewNote
-        open={!!selectedNote}
-        onClose={() => setSelectedNote(null)}
-        note={selectedNote}
-      />
-    </Container>
+        <ViewNote
+          open={!!selectedNote}
+          onClose={() => setSelectedNote(null)}
+          note={selectedNote}
+        />
+      </Container>
+    </div>
   );
 };
 

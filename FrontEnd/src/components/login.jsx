@@ -14,7 +14,7 @@ import IconButton from "@mui/material/IconButton";
 import InputAdornment from "@mui/material/InputAdornment";
 import sign_in from "../middleware/login";
 import { useNavigate } from "react-router-dom";
-import { useDispatch } from "../contexts/userContext";
+import { useUserDispatch } from "../contexts/userContext";
 import { Link } from "react-router-dom";
 
 const Login = () => {
@@ -24,7 +24,7 @@ const Login = () => {
   });
 
   const [show, setShow] = useState(false);
-  const dispatch = useDispatch();
+  const dispatch = useUserDispatch();
   const navigator = useNavigate();
 
   const [errors, setErrors] = useState({

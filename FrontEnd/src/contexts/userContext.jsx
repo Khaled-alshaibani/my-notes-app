@@ -20,4 +20,4 @@ export const UserProvider = ({ children }) => {
 };
 
 export const useUser = () => useContext(UserContext);
-export const useDispatch = () => useContext(DispatchContext);
+export const useUserDispatch = () => useContext(DispatchContext);

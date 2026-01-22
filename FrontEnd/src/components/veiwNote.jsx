@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -23,12 +23,20 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import CloseIcon from "@mui/icons-material/Close";
 import SaveIcon from "@mui/icons-material/Save";
+import updateNote from "../middleware/updateNote";
+import { useUser } from "../contexts/userContext";
+import { useNotesDispatch } from "../contexts/notesContext";
+import deleteNote from "../middleware/deleteNote";
+import LoadingOverlay from "./loading";
 
 const ViewNote = ({ open, onClose, note }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editedTitle, setEditedTitle] = useState(note?.title || "");
   const [editedContent, setEditedContent] = useState(note?.content || "");
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const user = useUser();
+  const notesDispatch = useNotesDispatch();
 
   const user = useUser();
   const dispatch = useDispatch();
@@ -74,9 +82,9 @@ const ViewNote = ({ open, onClose, note }) => {
       console.error(e);
     }
   };
-
   return (
     <>
+      <LoadingOverlay open={loading} />
       <Dialog
         open={open}
         onClose={onClose}

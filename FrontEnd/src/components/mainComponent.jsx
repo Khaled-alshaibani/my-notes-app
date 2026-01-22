@@ -6,7 +6,7 @@ import NavBar from "./navBar";
 import { useEffect } from "react";
 
 const MainComponent = () => {
-  const notesDispatch = useDispatch();
+  const notesDispatch = useNotesDispatch();
 
   useEffect(() => {
     const fetchNotes = async () => {
