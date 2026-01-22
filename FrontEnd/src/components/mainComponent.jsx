@@ -1,9 +1,11 @@
+import React from "react";
 import Typography from "@mui/material/Typography";
-import GetNotes from "../middleware/getNotes";
+
 import NoteAbriviated from "./noteAbriviated";
-import { useDispatch } from "../contexts/notesContext";
-import NavBar from "./navBar";
+import GetNotes from "../middleware/getNotes";
+import { useNotesDispatch } from "../contexts/notesContext";
 import { useEffect } from "react";
+import NavBar from "./navBar";
 
 const MainComponent = () => {
   const notesDispatch = useNotesDispatch();
@@ -11,11 +13,11 @@ const MainComponent = () => {
   useEffect(() => {
     const fetchNotes = async () => {
       const data = await GetNotes();
-      notesDispatch({ type: "Get", payload: data.notes });
-      console.log(data.notes);
+      notesDispatch({ type: "Get", payload: { data: data } });
     };
     fetchNotes();
-  }, [notesDispatch]);
+  }, []);
+
   return (
     <div
       style={{
@@ -36,8 +38,7 @@ const MainComponent = () => {
           fontSize: 25,
           fontWeight: "bolder",
           marginY: 10,
-          textAlign: "center",
-          p: 1,
+          textAlign: "center"
         }}
       >
         Turn fleeting thoughts into lasting notes, treasures of the mind.

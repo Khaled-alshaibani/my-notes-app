@@ -1,19 +1,23 @@
 import axios from "axios";
 
-const deleteNote = async ({ token, noteID, title, content }) => {
-  const body = { title, content };
+const deleteNote = async ({ user, id }) => {
+  console.log(user);
+  
+  const token = user.token;
+  console.log(token);
 
   try {
-    const response = await axios.put("http://localhost:5000/updateNote", body, {
-      headers: {
-        Authorization: `Bearer ${token}`,
+    const response = await axios.delete(
+      `http://localhost:5000/deleteNote/${id}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       },
-      params: { id: noteID },
-    });
+    );
     return response.data;
-  } catch (e) {
-    console.error("Error occurred:", e.response?.data || e.message);
-    throw e;
+  } catch (error) {
+    console.log(error);
   }
 };
 

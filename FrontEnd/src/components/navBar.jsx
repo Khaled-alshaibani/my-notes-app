@@ -19,13 +19,13 @@ import { useUser, useUserDispatch } from "../contexts/userContext";
 import { useNotesDispatch } from "../contexts/notesContext";
 import ValidateToken from "../middleware/validateToken";
 import Button from "@mui/material/Button";
+import Dialog from "@mui/material/Dialog";
+import DialogActions from "@mui/material/DialogActions";
+import DialogContent from "@mui/material/DialogContent";
+import DialogContentText from "@mui/material/DialogContentText";
+import DialogTitle from "@mui/material/DialogTitle";
 import Slide from "@mui/material/Slide";
 import AddNoteDialog from "./addNote";
-import Dialog from "@mui/material/Dialog";
-import DialogTitle from "@mui/material/DialogTitle";
-import DialogContent from "@mui/material/DialogContent";
-import DialogActions from "@mui/material/DialogActions";
-
 
 const drawerWidth = 240;
 const navItems = [
@@ -52,21 +52,30 @@ function NavBar(props) {
   useEffect(() => {
     if (user?.token) {
       const isLoggedIn = ValidateToken(user.token);
-      setCurrentUser(isLoggedIn ? user : null);
-    } else setCurrentUser(null);
+      if (isLoggedIn) setCurrentUser(user);
+      else setCurrentUser(null);
+    } else {
+      setCurrentUser(null);
+    }
   }, [user]);
 
   const { window } = props;
   const [mobileOpen, setMobileOpen] = useState(false);
   const [openDialog, setOpenDialog] = useState(false);
-  const [openAddNoteDialog, setOpenAddNoteDialog] = useState(false);
 
-  const handleDrawerToggle = () => setMobileOpen((prev) => !prev);
+  const handleDrawerToggle = () => {
+    setMobileOpen((prevState) => !prevState);
+  };
+
   const handleLogoutClick = (e) => {
     e.preventDefault();
     setOpenDialog(true);
   };
-  const handleCloseDialog = () => setOpenDialog(false);
+
+  const handleCloseDialog = () => {
+    setOpenDialog(false);
+  };
+
   const handleConfirmLogout = () => {
     userdispatch({ type: "Log Out" });
     setOpenDialog(false);
@@ -98,16 +107,6 @@ function NavBar(props) {
             </ListItemButton>
           </ListItem>
         ))}
-        {currentUser && (
-          <ListItem disablePadding>
-            <ListItemButton
-              sx={{ textAlign: "center" }}
-              onClick={() => setOpenAddNoteDialog(true)}
-            >
-              <ListItemText primary="New Note" />
-            </ListItemButton>
-          </ListItem>
-        )}
       </List>
       <Button
         sx={{ color: "white" }}
@@ -150,13 +149,16 @@ function NavBar(props) {
             </Typography>
             {currentUser ? (
               <>
-                <Typography sx={{ mr: 3, fontSize: 17, fontWeight: "bold" }}>
+                <Typography sx={{ mr: 3, fontSize: 14, fontWeight: "bold" }}>
                   {currentUser.userName}
                 </Typography>
                 <NavLink
                   to="#"
                   onClick={handleLogoutClick}
-                  style={{ textDecoration: "none", color: "white" }}
+                  style={{
+                    textDecoration: "none",
+                    color: "white",
+                  }}
                 >
                   Log Out
                 </NavLink>
@@ -165,17 +167,20 @@ function NavBar(props) {
               <>
                 <NavLink
                   to="/sign_up"
-                  style={{
+                  style={({ isActive }) => ({
                     textDecoration: "none",
-                    color: "white",
-                    marginRight: 10,
-                  }}
+                    color: isActive ? "rgb(24,156,245)" : "white",
+                    marginRight: "10px",
+                  })}
                 >
                   Sign Up
                 </NavLink>
                 <NavLink
                   to="/login"
-                  style={{ textDecoration: "none", color: "white" }}
+                  style={({ isActive }) => ({
+                    textDecoration: "none",
+                    color: isActive ? "rgb(24,156,245)" : "white",
+                  })}
                 >
                   Log In
                 </NavLink>
@@ -193,20 +198,18 @@ function NavBar(props) {
                 style={({ isActive }) => ({
                   textDecoration: "none",
                   color: isActive ? "rgb(24,156,245)" : "white",
-                  marginLeft: 20,
+                  marginLeft: "20px",
                 })}
               >
                 {item.label}
               </NavLink>
             ))}
-            {currentUser && (
-              <Button
-                onClick={() => setOpenAddNoteDialog(true)}
-                sx={{ ml: 2, color: "white", border: "1px solid white" }}
-              >
-                New Note
-              </Button>
-            )}
+            <Button
+              sx={{ color: "white", ml: 2 }}
+              onClick={() => setOpenAddNoteDialog(true)}
+            >
+              New Note
+            </Button>
           </Box>
 
           <IconButton
@@ -243,16 +246,12 @@ function NavBar(props) {
       </nav>
       <Toolbar />
 
-      <AddNoteDialog
-        open={openAddNoteDialog}
-        onClose={() => setOpenAddNoteDialog(false)}
-      />
-
       <Dialog
         open={openDialog}
         TransitionComponent={Transition}
         keepMounted
         onClose={handleCloseDialog}
+        aria-describedby="logout-dialog-description"
         PaperProps={{
           sx: {
             backgroundColor: "#1e1e1e",
@@ -264,9 +263,12 @@ function NavBar(props) {
       >
         <DialogTitle>{"Log out"}</DialogTitle>
         <DialogContent>
-          <Typography sx={{ color: "#bbb" }}>
+          <DialogContentText
+            id="logout-dialog-description"
+            sx={{ color: "#bbb" }}
+          >
             Are you sure you want to log out?
-          </Typography>
+          </DialogContentText>
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCloseDialog} sx={{ color: "gray" }}>

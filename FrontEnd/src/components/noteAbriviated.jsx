@@ -2,21 +2,36 @@ import * as React from "react";
 import CssBaseline from "@mui/material/CssBaseline";
 import Container from "@mui/material/Container";
 import Typography from "@mui/material/Typography";
-import { useNotes } from "../contexts/notesContext";
-import GetNotes from "../middleware/getNotes";
+import { useNotes, useNotesDispatch } from "../contexts/notesContext";
+import { useEffect } from "react";
 
+import GetNotes from "../middleware/getNotes";
 import NoteCard from "./noteCard";
 
 export default function NoteAbriviated() {
-  const notesData = useNotes();
-  const notes = Array.isArray(notesData) ? notesData : notesData?.notes || [];
+  const notesDispatch = useNotesDispatch();
+  let notes = useNotes();
+
+  useEffect(() => {
+    const fetchNotes = async () => {
+      const data = await GetNotes();
+
+      notesDispatch({ type: "Get", payload: data.notes });
+    };
+    fetchNotes();
+  }, [notesDispatch]);
+
   console.log(notes);
+
+  notes = Array.isArray(notes)
+    ? notes
+    : Array.isArray(notes?.notes)
+      ? notes.notes
+      : [];
 
   const latestNotes = [...notes]
     .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
     .slice(0, 2);
-
-  console.log(latestNotes);
 
   return (
     <React.Fragment>
@@ -34,18 +49,14 @@ export default function NoteAbriviated() {
       <hr style={{ width: "40%", fontWeight: "bolder" }} />
 
       <Container
-        maxWidth="lg"
+        maxWidth="md"
         sx={{
-          display: "grid",
-          gridTemplateColumns: {
-            xs: "1fr",
-            sm: "1fr 1fr",
-            md: "1fr 1fr 1fr",
-          },
+          display: "flex",
           gap: 4,
+          justifyContent: "center",
+          alignItems: "stretch",
           marginY: 5,
-          justifyItems: "center",
-          
+          flexWrap: "wrap",
         }}
       >
         {latestNotes.length === 0 ? (
@@ -55,7 +66,6 @@ export default function NoteAbriviated() {
               color: "gray",
               fontStyle: "italic",
               fontSize: 18,
-              gridColumn: "1 / -1",
             }}
           >
             No notes available yet
